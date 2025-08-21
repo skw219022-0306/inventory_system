@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}在庫レポート - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>在庫レポート</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5>在庫切れ商品</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if out_of_stock %}
+                            <ul class="list-group list-group-flush">
+                                {% for product in out_of_stock %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>{{ product.name }}</span>
+                                    <span class="badge bg-danger">0個</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">在庫切れ商品はありません</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning">
+                        <h5>在庫少商品（10個未満）</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if low_stock %}
+                            <ul class="list-group list-group-flush">
+                                {% for product in low_stock %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>{{ product.name }}</span>
+                                    <span class="badge bg-warning">{{ product.stock_quantity }}個</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">在庫少商品はありません</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>在庫回転率分析（過去30日）</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>商品名</th>
+                                <th>現在庫</th>
+                                <th>販売数量</th>
+                                <th>回転状況</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inventory_turnover %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.stock_quantity }}個</td>
+                                <td>{{ item.sold_quantity }}個</td>
+                                <td>
+                                    {% if item.sold_quantity == 0 %}
+                                        <span class="badge bg-secondary">売上なし</span>
+                                    {% elif item.sold_quantity > item.stock_quantity %}
+                                        <span class="badge bg-success">高回転</span>
+                                    {% elif item.sold_quantity > item.stock_quantity * 0.5 %}
+                                        <span class="badge bg-primary">中回転</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">低回転</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

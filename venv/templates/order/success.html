@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}注文完了 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="alert alert-success">
+            <h1>✅ 注文が完了しました</h1>
+            <p class="lead">ご注文ありがとうございました。</p>
+            {% if order %}
+            <p><strong>注文番号：{{ order.id }}</strong></p>
+            <p>合計金額：¥{{ "{:,}".format(order.total_amount|int) }}</p>
+            {% endif %}
+            <p>注文内容の確認メールをお送りします。</p>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('orders.order_index') }}" class="btn btn-primary btn-lg">商品一覧に戻る</a>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary btn-lg">管理画面で確認</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

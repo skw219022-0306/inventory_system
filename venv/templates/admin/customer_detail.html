@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}顧客詳細 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>顧客詳細: {{ customer.name }}</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>基本情報</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>顧客名:</strong> {{ customer.name }}</p>
+                        <p><strong>メールアドレス:</strong> {{ customer.email }}</p>
+                        <p><strong>電話番号:</strong> {{ customer.phone or '-' }}</p>
+                        <p><strong>住所:</strong> {{ customer.address or '-' }}</p>
+                        <p><strong>登録日:</strong> {{ customer.created_at.strftime('%Y/%m/%d') }}</p>
+                        <p><strong>保有ポイント:</strong> <span class="badge bg-primary fs-6">{{ customer.points }}pt</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>ポイント追加</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('customers.add_points') }}">
+                            <input type="hidden" name="customer_id" value="{{ customer.id }}">
+                            <div class="mb-3">
+                                <label class="form-label">追加ポイント</label>
+                                <input type="number" class="form-control" name="points" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">備考</label>
+                                <input type="text" class="form-control" name="notes" placeholder="ポイント追加理由">
+                            </div>
+                            <button type="submit" class="btn btn-success">ポイント追加</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>購入履歴</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>注文ID</th>
+                                        <th>注文日</th>
+                                        <th>税抜き</th>
+                                        <th>消費税</th>
+                                        <th>税込み</th>
+                                        <th>割引</th>
+                                        <th>ポイント使用</th>
+                                        <th>ポイント獲得</th>
+                                        <th>状態</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>#{{ order.id }}</td>
+                                        <td>{{ order.created_at.strftime('%Y/%m/%d') }}</td>
+                                        <td>¥{{ "{:,}".format(order.subtotal_amount|int) }}</td>
+                                        <td>¥{{ "{:,}".format(order.tax_amount|int) }}</td>
+                                        <td>¥{{ "{:,}".format(order.total_amount|int) }}</td>
+                                        <td>¥{{ "{:,}".format(order.discount_amount|int) }}</td>
+                                        <td>{{ order.points_used }}pt</td>
+                                        <td>{{ order.points_earned }}pt</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' }}">
+                                                {{ '完了' if order.status == 'completed' else '処理中' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>ポイント履歴</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>日付</th>
+                                        <th>ポイント</th>
+                                        <th>種類</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pt in point_history %}
+                                    <tr>
+                                        <td>{{ pt.created_at.strftime('%m/%d') }}</td>
+                                        <td class="{{ 'text-success' if pt.points > 0 else 'text-danger' }}">
+                                            {{ '+' if pt.points > 0 else '' }}{{ pt.points }}pt
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if pt.transaction_type == 'earned' else 'secondary' }}">
+                                                {{ '獲得' if pt.transaction_type == 'earned' else '使用' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

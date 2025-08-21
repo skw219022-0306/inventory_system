@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}マイページ - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>マイページ</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>基本情報</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>お名前:</strong> {{ customer.name }}</p>
+                        <p><strong>メールアドレス:</strong> {{ customer.email }}</p>
+                        <p><strong>電話番号:</strong> {{ customer.phone or '-' }}</p>
+                        <p><strong>住所:</strong> {{ customer.address or '-' }}</p>
+                        <p><strong>会員登録日:</strong> {{ customer.created_at.strftime('%Y年%m月%d日') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>ポイント情報</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 class="text-primary">{{ customer.points }}pt</h2>
+                        <p class="text-muted">保有ポイント</p>
+                        <small>1ポイント = 1円でご利用いただけます</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>購入履歴</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>注文日</th>
+                                        <th>注文番号</th>
+                                        <th>金額（税込み）</th>
+                                        <th>ポイント使用</th>
+                                        <th>ポイント獲得</th>
+                                        <th>状態</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>{{ order.created_at.strftime('%Y/%m/%d') }}</td>
+                                        <td>#{{ order.id }}</td>
+                                        <td>¥{{ "{:,}".format(order.total_amount|int) }}</td>
+                                        <td>{{ order.points_used }}pt</td>
+                                        <td class="text-success">+{{ order.points_earned }}pt</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' }}">
+                                                {{ '完了' if order.status == 'completed' else '処理中' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">まだ購入履歴がありません。</p>
+                        <a href="{{ url_for('orders.order_index') }}" class="btn btn-primary">商品を見る</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>ポイント履歴</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if point_history %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>日付</th>
+                                        <th>ポイント</th>
+                                        <th>種類</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pt in point_history %}
+                                    <tr>
+                                        <td>{{ pt.created_at.strftime('%m/%d') }}</td>
+                                        <td class="{{ 'text-success' if pt.points > 0 else 'text-danger' }}">
+                                            {{ '+' if pt.points > 0 else '' }}{{ pt.points }}pt
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if pt.transaction_type == 'earned' else 'secondary' }}">
+                                                {{ '獲得' if pt.transaction_type == 'earned' else '使用' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">ポイント履歴がありません。</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

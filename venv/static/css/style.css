@@ -1,0 +1,20 @@
+.card {
+    height: 100%;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.low-stock {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.alert {
+    margin-bottom: 1rem;
+}

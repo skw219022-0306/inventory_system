@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}動的価格設定 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>動的価格設定</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>価格調整提案</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>商品名</th>
+                                <th>現在価格</th>
+                                <th>推奨価格</th>
+                                <th>在庫回転率</th>
+                                <th>理由</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suggestion in pricing_suggestions %}
+                            <tr class="{{ 'table-warning' if suggestion.current_price != suggestion.suggested_price else '' }}">
+                                <td>{{ suggestion.product.name }}</td>
+                                <td>¥{{ "{:,}".format(suggestion.current_price|int) }}</td>
+                                <td>
+                                    <strong class="{{ 'text-success' if suggestion.suggested_price > suggestion.current_price else 'text-danger' if suggestion.suggested_price < suggestion.current_price else 'text-muted' }}">
+                                        ¥{{ "{:,}".format(suggestion.suggested_price|int) }}
+                                    </strong>
+                                </td>
+                                <td>{{ suggestion.turnover_rate }}</td>
+                                <td>{{ suggestion.reason }}</td>
+                                <td>
+                                    {% if suggestion.current_price != suggestion.suggested_price %}
+                                    <form method="POST" action="{{ url_for('ai_system.apply_pricing', product_id=suggestion.product.id) }}" class="d-inline">
+                                        <input type="hidden" name="new_price" value="{{ suggestion.suggested_price }}">
+                                        <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('価格を変更しますか？')">適用</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted">変更なし</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

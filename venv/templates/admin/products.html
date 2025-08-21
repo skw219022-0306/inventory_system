@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}商品管理 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>商品管理</h1>
+        
+        <!-- カテゴリ追加フォーム -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>カテゴリ管理</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('products.add_category') }}" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="name" placeholder="カテゴリ名" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="description" placeholder="説明">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-success w-100">追加</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for category in categories %}
+                    <span class="badge bg-secondary">{{ category.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 商品追加フォーム -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>新商品追加</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('products.add_product') }}" enctype="multipart/form-data">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="name" placeholder="商品名" required>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="category_id">
+                                <option value="">カテゴリを選択</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control" name="price" placeholder="価格" required>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control" name="stock_quantity" placeholder="初期在庫" value="0">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">追加</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="description" placeholder="説明">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 商品一覧 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>商品一覧</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>画像</th>
+                                <th>商品名</th>
+                                <th>カテゴリ</th>
+                                <th>価格</th>
+                                <th>在庫数</th>
+                                <th>評価</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr class="{% if product.stock_quantity == 0 %}table-danger{% elif product.stock_quantity < 10 %}table-warning{% endif %}">
+                                <td>{{ product.id }}</td>
+                                <td>
+                                    {% if product.image_filename %}
+                                    <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                    <span class="text-muted">画像なし</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name if product.category else '-' }}</td>
+                                <td>¥{{ "{:,}".format(product.price|int) }}</td>
+                                <td>
+                                    <strong class="{% if product.stock_quantity == 0 %}text-danger{% elif product.stock_quantity < 10 %}text-warning{% endif %}">
+                                        {{ product.stock_quantity }}個
+                                    </strong>
+                                </td>
+                                <td>
+                                    {% if product.average_rating > 0 %}
+                                    <span class="text-warning">★{{ "%.1f"|format(product.average_rating) }}</span>
+                                    {% else %}
+                                    <span class="text-muted">未評価</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ product.id }}">
+                                        編集
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- 編集モーダル -->
+                            <div class="modal fade" id="editModal{{ product.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">商品編集</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('products.edit_product', product_id=product.id) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">商品名</label>
+                                                    <input type="text" class="form-control" name="name" value="{{ product.name }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">カテゴリ</label>
+                                                    <select class="form-select" name="category_id">
+                                                        <option value="">カテゴリを選択</option>
+                                                        {% for category in categories %}
+                                                        <option value="{{ category.id }}" {{ 'selected' if product.category_id == category.id else '' }}>{{ category.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">説明</label>
+                                                    <textarea class="form-control" name="description">{{ product.description or '' }}</textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">価格</label>
+                                                    <input type="number" class="form-control" name="price" value="{{ product.price }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                                <button type="submit" class="btn btn-primary">更新</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

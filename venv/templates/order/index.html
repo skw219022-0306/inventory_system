@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}商品一覧 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>商品一覧</h1>
+        
+        <!-- 検索・フィルタリング -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="search" placeholder="商品名で検索" value="{{ search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="category_id">
+                            <option value="">すべてのカテゴリ</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {{ 'selected' if category_id == category.id else '' }}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="sort_by">
+                            <option value="name" {{ 'selected' if sort_by == 'name' else '' }}>名前順</option>
+                            <option value="price_asc" {{ 'selected' if sort_by == 'price_asc' else '' }}>価格の安い順</option>
+                            <option value="price_desc" {{ 'selected' if sort_by == 'price_desc' else '' }}>価格の高い順</option>
+                            <option value="rating" {{ 'selected' if sort_by == 'rating' else '' }}>評価の高い順</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">検索</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if product.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        {% if product.category %}
+                        <span class="badge bg-secondary mb-2">{{ product.category.name }}</span>
+                        {% endif %}
+                        <p class="card-text">{{ product.description }}</p>
+                        <div class="mb-2">
+                            {% if product.average_rating > 0 %}
+                            <span class="text-warning">
+                                {% for i in range(5) %}
+                                    {% if i < product.average_rating %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                                {{ "%.1f"|format(product.average_rating) }} ({{ product.reviews|length }}件)
+                            </span>
+                            {% else %}
+                            <span class="text-muted">レビューなし</span>
+                            {% endif %}
+                        </div>
+                        <p class="card-text">
+                            <strong>価格: ¥{{ "{:,}".format(product.price|int) }}</strong><br>
+                            <small class="text-muted">在庫: {{ product.stock_quantity }}個</small>
+                        </p>
+                        <div class="mt-auto">
+                            <form method="POST" action="{{ url_for('orders.add_to_cart') }}" class="mb-2">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <div class="input-group mb-2">
+                                    <input type="number" class="form-control" name="quantity" value="1" min="1" max="{{ product.stock_quantity }}">
+                                    <button class="btn btn-primary" type="submit">カートに追加</button>
+                                </div>
+                            </form>
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#reviewModal{{ product.id }}">
+                                レビューを書く
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- レビューモーダル -->
+                <div class="modal fade" id="reviewModal{{ product.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">レビュー投稿: {{ product.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('orders.add_review', product_id=product.id) }}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">評価</label>
+                                        <select class="form-select" name="rating" required>
+                                            <option value="">-</option>
+                                            <option value="5">★★★★★ 5</option>
+                                            <option value="4">★★★★☆ 4</option>
+                                            <option value="3">★★★☆☆ 3</option>
+                                            <option value="2">★★☆☆☆ 2</option>
+                                            <option value="1">★☆☆☆☆ 1</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">コメント</label>
+                                        <textarea class="form-control" name="comment" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                    <button type="submit" class="btn btn-primary">投稿</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

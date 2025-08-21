@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}顧客管理 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>顧客管理</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>新規顧客追加</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('customers.add_customer') }}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="name" placeholder="顧客名" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="email" class="form-control" name="email" placeholder="メールアドレス" required>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="phone" placeholder="電話番号">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="address" placeholder="住所">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">追加</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>顧客一覧</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>顧客名</th>
+                                <th>メールアドレス</th>
+                                <th>電話番号</th>
+                                <th>ポイント</th>
+                                <th>登録日</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in customers %}
+                            <tr>
+                                <td>{{ customer.id }}</td>
+                                <td>{{ customer.name }}</td>
+                                <td>{{ customer.email }}</td>
+                                <td>{{ customer.phone or '-' }}</td>
+                                <td><span class="badge bg-primary">{{ customer.points }}pt</span></td>
+                                <td>{{ customer.created_at.strftime('%Y/%m/%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('customers.customer_detail', customer_id=customer.id) }}" class="btn btn-sm btn-outline-info">詳細</a>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ customer.id }}">編集</button>
+                                </td>
+                            </tr>
+                            
+                            <div class="modal fade" id="editModal{{ customer.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">顧客編集</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('customers.edit_customer', customer_id=customer.id) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">顧客名</label>
+                                                    <input type="text" class="form-control" name="name" value="{{ customer.name }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">メールアドレス</label>
+                                                    <input type="email" class="form-control" value="{{ customer.email }}" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">電話番号</label>
+                                                    <input type="text" class="form-control" name="phone" value="{{ customer.phone or '' }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">住所</label>
+                                                    <textarea class="form-control" name="address">{{ customer.address or '' }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                                <button type="submit" class="btn btn-primary">更新</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

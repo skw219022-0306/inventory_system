@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}売上レポート - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>売上レポート</h1>
+        
+        <div class="mb-3">
+            <a href="{{ url_for('reports.sales_report', period='daily') }}" class="btn btn-outline-primary {{ 'active' if period == 'daily' else '' }}">日別</a>
+            <a href="{{ url_for('reports.sales_report', period='monthly') }}" class="btn btn-outline-primary {{ 'active' if period == 'monthly' else '' }}">月別</a>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>{{ '日別' if period == 'daily' else '月別' }}売上推移</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{ '日付' if period == 'daily' else '月' }}</th>
+                                <th>売上金額</th>
+                                <th>注文数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in sales_data %}
+                            <tr>
+                                <td>{{ data.date if period == 'daily' else data.month }}</td>
+                                <td>¥{{ "{:,}".format(data.total|int) }}</td>
+                                <td>{{ data.orders }}件</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>商品別売上ランキング（TOP10）</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>順位</th>
+                                <th>商品名</th>
+                                <th>販売数量</th>
+                                <th>売上金額</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in product_sales %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.quantity }}個</td>
+                                <td>¥{{ "{:,}".format(product.revenue|int) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

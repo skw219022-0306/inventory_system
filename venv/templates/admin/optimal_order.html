@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}最適発注量計算 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>最適発注量計算</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>発注提案（優先度順）</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>優先度</th>
+                                <th>商品名</th>
+                                <th>現在庫</th>
+                                <th>日平均売上</th>
+                                <th>在庫切れまで</th>
+                                <th>推奨発注量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suggestion in order_suggestions %}
+                            <tr class="{{ 'table-danger' if suggestion.priority == '緊急' else 'table-warning' if suggestion.priority == '高' else '' }}">
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if suggestion.priority == '緊急' else 'warning' if suggestion.priority == '高' else 'info' if suggestion.priority == '中' else 'secondary' }}">
+                                        {{ suggestion.priority }}
+                                    </span>
+                                </td>
+                                <td>{{ suggestion.product.name }}</td>
+                                <td>{{ suggestion.product.stock_quantity }}個</td>
+                                <td>{{ suggestion.avg_daily_sales }}個/日</td>
+                                <td>
+                                    {% if suggestion.days_until_stockout < 7 %}
+                                        <span class="text-danger">{{ suggestion.days_until_stockout }}日</span>
+                                    {% elif suggestion.days_until_stockout < 14 %}
+                                        <span class="text-warning">{{ suggestion.days_until_stockout }}日</span>
+                                    {% else %}
+                                        {{ suggestion.days_until_stockout }}日
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ suggestion.optimal_order_qty }}個</strong>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

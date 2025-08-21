@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}注文管理 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>注文管理</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>注文一覧</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>注文ID</th>
+                                <th>顧客名</th>
+                                <th>注文日</th>
+                                <th>税抜き</th>
+                                <th>消費税</th>
+                                <th>税込み</th>
+                                <th>状態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.customer_name }}</td>
+                                <td>{{ order.created_at.strftime('%Y/%m/%d %H:%M') }}</td>
+                                <td>¥{{ "{:,}".format(order.subtotal_amount|int) }}</td>
+                                <td>¥{{ "{:,}".format(order.tax_amount|int) }}</td>
+                                <td>¥{{ "{:,}".format(order.total_amount|int) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' }}">
+                                        {{ '完了' if order.status == 'completed' else '処理中' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

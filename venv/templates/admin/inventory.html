@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}在庫管理 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>在庫管理</h1>
+        
+        <!-- 在庫更新フォーム -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>在庫更新</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('inventory.update_inventory') }}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select class="form-select" name="product_id" required>
+                                <option value="">商品を選択</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}">{{ product.name }} (現在庫: {{ product.stock_quantity }}個)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="transaction_type" required>
+                                <option value="in">入庫</option>
+                                <option value="out">出庫</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control" name="quantity" placeholder="数量" min="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="notes" placeholder="備考">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">更新</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 現在の在庫状況 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>現在の在庫状況</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>商品名</th>
+                                <th>現在庫</th>
+                                <th>価格</th>
+                                <th>状態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr class="{% if product.stock_quantity == 0 %}table-danger{% elif product.stock_quantity < 10 %}table-warning{% endif %}">
+                                <td>{{ product.name }}</td>
+                                <td><strong>{{ product.stock_quantity }}個</strong></td>
+                                <td>¥{{ "{:,}".format(product.price|int) }}</td>
+                                <td>
+                                    {% if product.stock_quantity == 0 %}
+                                        <span class="badge bg-danger">在庫切れ</span>
+                                    {% elif product.stock_quantity < 10 %}
+                                        <span class="badge bg-warning">在庫少</span>
+                                    {% else %}
+                                        <span class="badge bg-success">在庫十分</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在庫取引履歴 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>在庫取引履歴（最新20件）</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>日時</th>
+                                <th>商品名</th>
+                                <th>種類</th>
+                                <th>数量</th>
+                                <th>備考</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td>{{ transaction.created_at.strftime('%m/%d %H:%M') }}</td>
+                                <td>{{ transaction.product.name }}</td>
+                                <td>
+                                    {% if transaction.transaction_type == 'in' %}
+                                        <span class="badge bg-primary">入庫</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">出庫</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ transaction.quantity }}個</td>
+                                <td>{{ transaction.notes or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

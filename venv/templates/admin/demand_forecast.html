@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}需要予測AI - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>需要予測AI</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>商品別需要予測</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>商品名</th>
+                                <th>現在の日平均売上</th>
+                                <th>トレンド</th>
+                                <th>7日後予測</th>
+                                <th>30日後予測</th>
+                                <th>信頼度</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for forecast in forecasts %}
+                            <tr>
+                                <td>{{ forecast.product.name }}</td>
+                                <td>{{ "%.1f"|format(forecast.current_sales) }}個/日</td>
+                                <td>
+                                    {% if forecast.trend > 0 %}
+                                        <span class="text-success">↗ +{{ "%.1f"|format(forecast.trend) }}</span>
+                                    {% elif forecast.trend < 0 %}
+                                        <span class="text-danger">↘ {{ "%.1f"|format(forecast.trend) }}</span>
+                                    {% else %}
+                                        <span class="text-muted">→ 横ばい</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ forecast.forecast_7days }}個</td>
+                                <td>{{ forecast.forecast_30days }}個</td>
+                                <td>
+                                    <div class="progress" style="width: 100px;">
+                                        <div class="progress-bar bg-{{ 'success' if forecast.confidence > 70 else 'warning' if forecast.confidence > 40 else 'danger' }}" 
+                                             style="width: {{ forecast.confidence }}%">
+                                            {{ forecast.confidence }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

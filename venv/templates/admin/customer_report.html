@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}顧客分析 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>顧客分析</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">総顧客数</h5>
+                        <h2 class="text-primary">{{ total_customers }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">リピート率</h5>
+                        <h2 class="text-success">{{ "%.1f"|format(repeat_rate) }}%</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">平均購入金額</h5>
+                        <h2 class="text-info">
+                            {% set total_revenue = customer_stats|sum(attribute='total_spent') %}
+                            {% set avg_order = (total_revenue / total_customers) if total_customers > 0 else 0 %}
+                            ¥{{ "{:,}".format(avg_order|int) }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>顧客別購入履歴（TOP20）</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>順位</th>
+                                <th>顧客名</th>
+                                <th>メールアドレス</th>
+                                <th>注文回数</th>
+                                <th>総購入金額</th>
+                                <th>最終注文日</th>
+                                <th>顧客タイプ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in customer_stats %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ customer.customer_name }}</td>
+                                <td>{{ customer.customer_email }}</td>
+                                <td>{{ customer.order_count }}回</td>
+                                <td>¥{{ "{:,}".format(customer.total_spent|int) }}</td>
+                                <td>{{ customer.last_order.strftime('%Y/%m/%d') }}</td>
+                                <td>
+                                    {% if customer.order_count >= 5 %}
+                                        <span class="badge bg-success">VIP</span>
+                                    {% elif customer.order_count >= 2 %}
+                                        <span class="badge bg-primary">リピーター</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">新規</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

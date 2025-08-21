@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}管理ダッシュボード - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>管理ダッシュボード</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="card-title">総商品数</div>
+                <h2>{{ total_products }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="card-title">総注文数</div>
+                <h2>{{ total_orders }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="card-title">在庫切れ間近</div>
+                <h2>{{ low_stock_products }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="card-title">総売上</div>
+                <h2>¥{{ "{:,}".format(total_revenue|int) }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>最近の注文</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>注文ID</th>
+                                <th>顧客名</th>
+                                <th>金額</th>
+                                <th>日時</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.customer_name }}</td>
+                                <td>¥{{ "{:,}".format(order.total_amount|int) }}</td>
+                                <td>{{ order.created_at.strftime('%m/%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>在庫切れ間近の商品</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>商品名</th>
+                                <th>現在庫</th>
+                                <th>価格</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in low_stock_items %}
+                            <tr class="{% if item.stock_quantity == 0 %}table-danger{% elif item.stock_quantity < 5 %}table-warning{% endif %}">
+                                <td>{{ item.name }}</td>
+                                <td><strong>{{ item.stock_quantity }}個</strong></td>
+                                <td>¥{{ "{:,}".format(item.price|int) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}ユーザー管理 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>ユーザー管理</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>新規ユーザー追加</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('users.add_user') }}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="username" placeholder="ユーザー名" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="password" class="form-control" name="password" placeholder="パスワード" required>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="role" required>
+                                <option value="user">一般ユーザー</option>
+                                <option value="admin">管理者</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">追加</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>ユーザー一覧</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ユーザー名</th>
+                                <th>権限</th>
+                                <th>作成日</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' }}">
+                                        {{ '管理者' if user.role == 'admin' else '一般ユーザー' }}
+                                    </span>
+                                </td>
+                                <td>{{ user.created_at.strftime('%Y/%m/%d') }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ user.id }}">
+                                        編集
+                                    </button>
+                                    {% if user.id != session.user_id %}
+                                    <form method="POST" action="{{ url_for('users.delete_user', user_id=user.id) }}" class="d-inline" onsubmit="return confirm('本当に削除しますか？')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">削除</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            
+                            <div class="modal fade" id="editModal{{ user.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">ユーザー編集</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('users.edit_user', user_id=user.id) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">ユーザー名</label>
+                                                    <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">新しいパスワード（変更する場合のみ）</label>
+                                                    <input type="password" class="form-control" name="password" placeholder="新しいパスワード">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">権限</label>
+                                                    <select class="form-select" name="role" required>
+                                                        <option value="user" {{ 'selected' if user.role == 'user' else '' }}>一般ユーザー</option>
+                                                        <option value="admin" {{ 'selected' if user.role == 'admin' else '' }}>管理者</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                                <button type="submit" class="btn btn-primary">更新</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

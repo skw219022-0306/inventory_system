@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}レポート・分析 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>レポート・分析</h1>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">売上レポート</h5>
+                        <p class="card-text">日別・月別・商品別の売上分析</p>
+                        <a href="{{ url_for('reports.sales_report') }}" class="btn btn-primary">詳細を見る</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">在庫レポート</h5>
+                        <p class="card-text">在庫状況・回転率分析</p>
+                        <a href="{{ url_for('reports.inventory_report') }}" class="btn btn-primary">詳細を見る</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">顧客分析</h5>
+                        <p class="card-text">購入履歴・リピート率分析</p>
+                        <a href="{{ url_for('reports.customer_report') }}" class="btn btn-primary">詳細を見る</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

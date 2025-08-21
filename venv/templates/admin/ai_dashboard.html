@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}AI予測・最適化システム - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>AI予測・最適化システム</h1>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">需要予測AI</h5>
+                        <p class="card-text">過去の売上データから将来の需要を予測</p>
+                        <a href="{{ url_for('ai_system.demand_forecast') }}" class="btn btn-primary">予測を見る</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">動的価格設定</h5>
+                        <p class="card-text">需要・在庫状況に応じた自動価格調整</p>
+                        <a href="{{ url_for('ai_system.dynamic_pricing') }}" class="btn btn-primary">価格提案を見る</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">最適発注量計算</h5>
+                        <p class="card-text">季節性・トレンドを考慮した自動発注提案</p>
+                        <a href="{{ url_for('ai_system.optimal_order') }}" class="btn btn-primary">発注提案を見る</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">異常検知</h5>
+                        <p class="card-text">売上パターンの異常を検出してアラート</p>
+                        <a href="{{ url_for('ai_system.anomaly_detection') }}" class="btn btn-primary">異常を確認</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}カート - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>ショッピングカート</h1>
+        
+        {% if cart_items %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>単価</th>
+                        <th>数量</th>
+                        <th>小計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>¥{{ "{:,}".format(item.product.price|int) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>¥{{ "{:,}".format(item.subtotal|int) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">小計（税抜き）</th>
+                        <th>¥{{ "{:,}".format(total|int) }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3">消費税（10%）</th>
+                        <th>¥{{ "{:,}".format((total * 0.10)|int) }}</th>
+                    </tr>
+                    <tr class="table-info">
+                        <th colspan="3">合計（税込み）</th>
+                        <th>¥{{ "{:,}".format((total * 1.10)|int) }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div class="mt-4">
+            <h3>注文情報</h3>
+            <form method="POST" action="{{ url_for('orders.checkout') }}">
+                <div class="mb-3">
+                    <label for="customer_name" class="form-label">お名前</label>
+                    <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customer_email" class="form-label">メールアドレス</label>
+                    <input type="email" class="form-control" id="customer_email" name="customer_email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="points_to_use" class="form-label">使用ポイント（任意）</label>
+                    <input type="number" class="form-control" id="points_to_use" name="points_to_use" min="0" value="0">
+                    <small class="form-text text-muted">1ポイント = 1円で使用できます</small>
+                </div>
+                <button type="submit" class="btn btn-success btn-lg">注文を確定する</button>
+                <a href="{{ url_for('orders.order_index') }}" class="btn btn-secondary btn-lg">買い物を続ける</a>
+            </form>
+        </div>
+        
+        {% else %}
+        <div class="alert alert-info">
+            <h4>カートは空です</h4>
+            <p>商品を追加してください。</p>
+            <a href="{{ url_for('orders.order_index') }}" class="btn btn-primary">商品一覧へ</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}異常検知 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>異常検知システム</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>検出された異常</h5>
+            </div>
+            <div class="card-body">
+                {% if anomalies %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>日付</th>
+                                <th>種類</th>
+                                <th>内容</th>
+                                <th>重要度</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for anomaly in anomalies %}
+                            <tr class="{{ 'table-danger' if anomaly.severity == '高' else 'table-warning' if anomaly.severity == '中' else '' }}">
+                                <td>{{ anomaly.date }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if anomaly.type == '在庫切れ' else 'warning' if anomaly.type == '急激な需要増加' else 'info' }}">
+                                        {{ anomaly.type }}
+                                    </span>
+                                </td>
+                                <td>{{ anomaly.description }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if anomaly.severity == '高' else 'warning' if anomaly.severity == '中' else 'secondary' }}">
+                                        {{ anomaly.severity }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <h4>✅ 異常は検出されていません</h4>
+                    <p>現在、システムに異常なパターンは検出されていません。</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
